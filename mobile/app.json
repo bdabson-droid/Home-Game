@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Home Game",
+    "slug": "home-game",
+    "scheme": "homegame",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.homegame"
+    },
+    "android": {
+      "package": "com.example.homegame",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b3b2e"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "http://localhost:4000"
+    }
+  }
+}
