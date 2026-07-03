@@ -37,6 +37,7 @@ function initDb() {
       scheduled_at TEXT,
       status TEXT DEFAULT 'active',
       created_at TEXT DEFAULT (datetime('now')),
+      max_seats INTEGER NOT NULL DEFAULT 9,
       FOREIGN KEY (host_id) REFERENCES users(id)
     );
 
@@ -83,6 +84,12 @@ function initDb() {
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
   `);
+
+  try {
+    db.exec(`ALTER TABLE home_games ADD COLUMN max_seats INTEGER NOT NULL DEFAULT 9`);
+  } catch {
+    // column already exists
+  }
 
   return db;
 }

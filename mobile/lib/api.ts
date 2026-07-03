@@ -60,7 +60,13 @@ export interface HomeGame {
   status: string;
   createdAt: string;
   hostName?: string;
+  maxSeats: number;
   memberCount?: number;
+  waitingCount?: number;
+  seatsAvailable?: number;
+  isFull?: boolean;
+  userStatus?: 'active' | 'waiting' | null;
+  waitingPosition?: number | null;
 }
 
 export interface GameMember {
@@ -68,6 +74,14 @@ export interface GameMember {
   name: string;
   phone: string;
   role: string;
+  joinedAt: string;
+}
+
+export interface WaitingMember {
+  id: string;
+  name: string;
+  phone: string;
+  position: number;
   joinedAt: string;
 }
 
@@ -114,17 +128,29 @@ export const api = {
     request<{
       game: HomeGame;
       members: GameMember[];
+      waitingList: WaitingMember[];
       pendingInvites: PendingInvite[];
     }>(`/api/games/${id}`),
 
-  createGame: (data: { name: string; description?: string; location?: string; scheduledAt?: string }) =>
+  createGame: (data: {
+    name: string;
+    maxSeats: number;
+    description?: string;
+    location?: string;
+    scheduledAt?: string;
+  }) =>
     request<{ game: HomeGame }>('/api/games', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   joinGame: (code: string) =>
-    request<{ game: HomeGame; message: string }>('/api/games/join', {
+    request<{
+      game: HomeGame;
+      status: 'active' | 'waiting';
+      waitingPosition?: number;
+      message: string;
+    }>('/api/games/join', {
       method: 'POST',
       body: JSON.stringify({ code }),
     }),
@@ -138,12 +164,22 @@ export const api = {
   getPendingInvites: () => request<{ invites: GameInvite[] }>('/api/games/invites/pending'),
 
   acceptInvite: (inviteId: string) =>
-    request<{ game: HomeGame; message: string }>(`/api/games/invites/${inviteId}/accept`, {
+    request<{
+      game: HomeGame;
+      status: 'active' | 'waiting';
+      waitingPosition?: number;
+      message: string;
+    }>(`/api/games/invites/${inviteId}/accept`, {
       method: 'POST',
     }),
 
   removeMember: (gameId: string, userId: string) =>
-    request<{ message: string }>(`/api/games/${gameId}/members/${userId}`, {
+    request<{ message: string; promotedUserId?: string | null }>(`/api/games/${gameId}/members/${userId}`, {
+      method: 'DELETE',
+    }),
+
+  removeFromWaitingList: (gameId: string, userId: string) =>
+    request<{ message: string }>(`/api/games/${gameId}/waiting/${userId}`, {
       method: 'DELETE',
     }),
 

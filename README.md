@@ -13,8 +13,9 @@ server/     Node.js REST API with SQLite
 
 - **Phone-based accounts** with OTP verification
 - **Host subscription** ($9.99/mo) — required to create and manage home games
-- **Create home games** with name, description, and location
+- **Create home games** with name, description, location, and seat limit
 - **6-digit join codes** — players enter a code to join a specific game
+- **Waiting list** — when all seats are full, players join a first-come-first-served waitlist
 - **Phone invites** — hosts invite players by phone number
 - **Player management** — view roster, remove players (host only)
 - **Share join codes** via native share sheet

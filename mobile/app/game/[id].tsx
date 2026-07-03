@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../lib/auth';
-import { api, HomeGame, GameMember, PendingInvite } from '../../lib/api';
+import { api, HomeGame, GameMember, WaitingMember, PendingInvite } from '../../lib/api';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Card } from '../../components/Card';
@@ -20,6 +20,7 @@ export default function GameDetailScreen() {
   const { user } = useAuth();
   const [game, setGame] = useState<HomeGame | null>(null);
   const [members, setMembers] = useState<GameMember[]>([]);
+  const [waitingList, setWaitingList] = useState<WaitingMember[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [invitePhone, setInvitePhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,7 @@ export default function GameDetailScreen() {
       const res = await api.getGame(id);
       setGame(res.game);
       setMembers(res.members);
+      setWaitingList(res.waitingList);
       setPendingInvites(res.pendingInvites);
     } catch (e: unknown) {
       Alert.alert('Error', e instanceof Error ? e.message : 'Failed to load game');
@@ -67,7 +69,26 @@ export default function GameDetailScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
-            await api.removeMember(id!, member.id);
+            const res = await api.removeMember(id!, member.id);
+            Alert.alert('Player Removed', res.message);
+            loadGame();
+          } catch (e: unknown) {
+            Alert.alert('Error', e instanceof Error ? e.message : 'Failed to remove');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleRemoveFromWaiting = (member: WaitingMember) => {
+    Alert.alert('Remove from Waitlist', `Remove ${member.name} from the waiting list?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.removeFromWaitingList(id!, member.id);
             loadGame();
           } catch (e: unknown) {
             Alert.alert('Error', e instanceof Error ? e.message : 'Failed to remove');
@@ -105,6 +126,10 @@ export default function GameDetailScreen() {
             🗓 {new Date(game.scheduledAt).toLocaleString()}
           </Text>
         ) : null}
+        <Text style={styles.seats}>
+          Seats: {game.memberCount ?? members.length} / {game.maxSeats}
+          {game.isFull ? ' (Full)' : ` · ${game.seatsAvailable ?? 0} open`}
+        </Text>
       </Card>
 
       <Card style={styles.codeCard}>
@@ -129,7 +154,9 @@ export default function GameDetailScreen() {
         </Card>
       )}
 
-      <Text style={styles.sectionTitle}>Players ({members.length})</Text>
+      <Text style={styles.sectionTitle}>
+        Players ({members.length}/{game.maxSeats})
+      </Text>
       {members.map((member) => (
         <Card key={member.id} style={styles.memberCard}>
           <View style={styles.memberRow}>
@@ -155,6 +182,34 @@ export default function GameDetailScreen() {
           </View>
         </Card>
       ))}
+
+      {waitingList.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>
+            Waiting List ({waitingList.length}) — first come, first served
+          </Text>
+          {waitingList.map((member) => (
+            <Card key={member.id} style={styles.memberCard}>
+              <View style={styles.memberRow}>
+                <View style={styles.memberInfo}>
+                  <Text style={styles.memberName}>
+                    #{member.position} {member.name}
+                  </Text>
+                  <Text style={styles.memberPhone}>{formatPhone(member.phone)}</Text>
+                </View>
+                {isHost && (
+                  <Button
+                    title="Remove"
+                    variant="danger"
+                    onPress={() => handleRemoveFromWaiting(member)}
+                    style={styles.removeBtn}
+                  />
+                )}
+              </View>
+            </Card>
+          ))}
+        </>
+      )}
 
       {isHost && pendingInvites.length > 0 && (
         <>
@@ -206,6 +261,11 @@ const styles = StyleSheet.create({
   meta: {
     color: colors.textMuted,
     marginTop: spacing.xs,
+  },
+  seats: {
+    color: colors.primary,
+    marginTop: spacing.sm,
+    fontWeight: '600',
   },
   codeCard: {
     marginTop: spacing.md,

@@ -10,6 +10,7 @@ import { colors, spacing } from '../../constants/theme';
 export default function CreateGameScreen() {
   const { user, refreshUser } = useAuth();
   const [name, setName] = useState('');
+  const [maxSeats, setMaxSeats] = useState('9');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,10 +40,16 @@ export default function CreateGameScreen() {
       Alert.alert('Error', 'Game name is required');
       return;
     }
+    const seats = parseInt(maxSeats, 10);
+    if (!seats || seats < 2 || seats > 20) {
+      Alert.alert('Error', 'Seats must be between 2 and 20');
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.createGame({
         name: name.trim(),
+        maxSeats: seats,
         description: description.trim() || undefined,
         location: location.trim() || undefined,
       });
@@ -66,6 +73,13 @@ export default function CreateGameScreen() {
         placeholder="Friday Night Poker"
         value={name}
         onChangeText={setName}
+      />
+      <Input
+        label="Number of Seats *"
+        placeholder="9"
+        value={maxSeats}
+        onChangeText={(t) => setMaxSeats(t.replace(/\D/g, '').slice(0, 2))}
+        keyboardType="number-pad"
       />
       <Input
         label="Description"

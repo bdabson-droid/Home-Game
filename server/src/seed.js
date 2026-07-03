@@ -26,8 +26,8 @@ if (!existingHost) {
 
   const gameId = uuidv4();
   db.prepare(`
-    INSERT INTO home_games (id, host_id, name, join_code, description, location)
-    VALUES (?, ?, 'Friday Night Poker', '123456', 'Weekly home game', 'Mike''s basement')
+    INSERT INTO home_games (id, host_id, name, join_code, description, location, max_seats)
+    VALUES (?, ?, 'Friday Night Poker', '123456', 'Weekly home game', 'Mike''s basement', 9)
   `).run(gameId, hostId);
 
   db.prepare(`

@@ -45,7 +45,10 @@ export default function GamesScreen() {
 
   const acceptInvite = async (inviteId: string) => {
     try {
-      await api.acceptInvite(inviteId);
+      const res = await api.acceptInvite(inviteId);
+      if (res.status === 'waiting') {
+        alert(`Game is full. You're #${res.waitingPosition} on the waiting list.`);
+      }
       loadData();
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : 'Failed to accept invite');
@@ -71,10 +74,19 @@ export default function GamesScreen() {
         ) : null}
         <View style={styles.gameFooter}>
           <Text style={styles.memberCount}>
-            {item.memberCount ?? 0} player{(item.memberCount ?? 0) !== 1 ? 's' : ''}
+            {item.memberCount ?? 0}/{item.maxSeats ?? '?'} seats
+            {item.userStatus === 'waiting' ? ' · Waiting' : ''}
           </Text>
           <Text style={styles.joinCode}>Code: {item.joinCode}</Text>
         </View>
+        {item.userStatus === 'waiting' && item.waitingPosition ? (
+          <Text style={styles.waitingBadge}>
+            Waitlist position #{item.waitingPosition}
+          </Text>
+        ) : null}
+        {item.isFull && item.waitingCount ? (
+          <Text style={styles.waitingMeta}>{item.waitingCount} on waitlist</Text>
+        ) : null}
       </Card>
     </TouchableOpacity>
   );
@@ -219,6 +231,17 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '700',
     fontSize: 13,
+  },
+  waitingBadge: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: spacing.xs,
+  },
+  waitingMeta: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: spacing.xs,
   },
   empty: {
     alignItems: 'center',

@@ -24,7 +24,11 @@ export default function JoinScreen() {
     setLoading(true);
     try {
       const res = await api.joinGame(trimmed);
-      setSuccess(`Joined "${res.game.name}"!`);
+      const msg =
+        res.status === 'waiting'
+          ? `Added to waitlist for "${res.game.name}" (position #${res.waitingPosition})`
+          : `Joined "${res.game.name}"!`;
+      setSuccess(msg);
       setCode('');
       setTimeout(() => router.push(`/game/${res.game.id}`), 1000);
     } catch (e: unknown) {
