@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Poker Home Game",
+    "slug": "poker-home-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "pokerhomegame",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pokerhomegame.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D4A2B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.pokerhomegame.app",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}
