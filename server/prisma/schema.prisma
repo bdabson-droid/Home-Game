@@ -1,0 +1,132 @@
+// Prisma schema for the Poker Home Game backend.
+// Uses SQLite by default so the project runs with zero external services.
+// Swap the datasource provider to "postgresql" for production.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  phone       String   @unique
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscription Subscription?
+  memberships  Membership[]
+  hostedGames  HomeGame[]    @relation("HostGames")
+  sentInvites  Invite[]      @relation("InvitedBy")
+  sessionSeats SessionSeat[]
+}
+
+// One-time passcodes for phone based login.
+model OtpCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  consumed  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+}
+
+// Host subscription. A user must have an active subscription to create games.
+// status is one of: none | incomplete | active | past_due | canceled
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status               String    @default("none")
+  plan                 String    @default("host_monthly")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+// A poker home game "list" owned by a host.
+model HomeGame {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  location    String?
+  // Numeric join code players can use to self sign up.
+  joinCode    String   @unique
+  defaultBuyIn Int     @default(100)
+  hostId      String
+  host        User     @relation("HostGames", fields: [hostId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships Membership[]
+  invites     Invite[]
+  sessions    GameSession[]
+}
+
+// role is one of: host | player
+model Membership {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      HomeGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("player")
+  createdAt DateTime @default(now())
+
+  @@unique([gameId, userId])
+}
+
+// Invite issued to a phone number that may not yet have an account.
+// status is one of: pending | accepted | revoked
+model Invite {
+  id          String    @id @default(cuid())
+  gameId      String
+  game        HomeGame  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  phone       String
+  status      String    @default("pending")
+  invitedById String
+  invitedBy   User      @relation("InvitedBy", fields: [invitedById], references: [id])
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([gameId, phone])
+  @@index([phone])
+}
+
+// A single night / instance of a home game.
+// status is one of: scheduled | live | completed | canceled
+model GameSession {
+  id          String   @id @default(cuid())
+  gameId      String
+  game        HomeGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime
+  location    String?
+  status      String   @default("scheduled")
+  createdAt   DateTime @default(now())
+
+  seats SessionSeat[]
+}
+
+// A player's participation + ledger for a session.
+model SessionSeat {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buyIn     Int         @default(0)
+  cashOut   Int?
+  rsvp      String      @default("yes")
+  createdAt DateTime    @default(now())
+
+  @@unique([sessionId, userId])
+}
