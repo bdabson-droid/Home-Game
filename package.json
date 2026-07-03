@@ -1,0 +1,39 @@
+{
+  "name": "home-game",
+  "version": "1.0.0",
+  "description": "Mobile app prototype for managing private poker home games.",
+  "main": "expo/AppEntry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bdabson-droid/Home-Game.git"
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "poker",
+    "home-game"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bdabson-droid/Home-Game/issues"
+  },
+  "homepage": "https://github.com/bdabson-droid/Home-Game#readme",
+  "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "expo": "^57.0.2",
+    "react": "^19.2.7",
+    "react-native": "^0.86.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "typescript": "^6.0.3"
+  }
+}
