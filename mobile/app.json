@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Home Game",
+    "slug": "home-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "homegame",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.homegame.app"
+    },
+    "android": {
+      "package": "com.homegame.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B7A4B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    }
+  }
+}
