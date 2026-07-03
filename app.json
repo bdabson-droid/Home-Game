@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Home Game",
+    "slug": "home-game",
+    "scheme": "homegame",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0B0F14",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.homegame.app"
+    },
+    "android": {
+      "package": "com.homegame.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0F14"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
