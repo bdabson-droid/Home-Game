@@ -62,7 +62,7 @@ export default function GameDetailScreen() {
   };
 
   const handleRemove = (member: GameMember) => {
-    Alert.alert('Remove Player', `Remove ${member.name} from this game?`, [
+    Alert.alert('Remove Player', `Remove ${member.nickname} from this game?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
@@ -81,7 +81,7 @@ export default function GameDetailScreen() {
   };
 
   const handleRemoveFromWaiting = (member: WaitingMember) => {
-    Alert.alert('Remove from Waitlist', `Remove ${member.name} from the waiting list?`, [
+    Alert.alert('Remove from Waitlist', `Remove ${member.nickname} from the waiting list?`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Remove',
@@ -161,8 +161,7 @@ export default function GameDetailScreen() {
         <Card key={member.id} style={styles.memberCard}>
           <View style={styles.memberRow}>
             <View style={styles.memberInfo}>
-              <Text style={styles.memberName}>{member.name}</Text>
-              <Text style={styles.memberPhone}>{formatPhone(member.phone)}</Text>
+              <Text style={styles.memberName}>{member.nickname}</Text>
             </View>
             <View style={styles.memberActions}>
               {member.role === 'host' && (
@@ -193,9 +192,8 @@ export default function GameDetailScreen() {
               <View style={styles.memberRow}>
                 <View style={styles.memberInfo}>
                   <Text style={styles.memberName}>
-                    #{member.position} {member.name}
+                    #{member.position} {member.nickname}
                   </Text>
-                  <Text style={styles.memberPhone}>{formatPhone(member.phone)}</Text>
                 </View>
                 {isHost && (
                   <Button
@@ -216,21 +214,14 @@ export default function GameDetailScreen() {
           <Text style={styles.sectionTitle}>Pending Invites</Text>
           {pendingInvites.map((invite) => (
             <Card key={invite.id} style={styles.memberCard}>
-              <Text style={styles.memberName}>{formatPhone(invite.phone)}</Text>
-              <Text style={styles.memberPhone}>Invited by {invite.invitedBy}</Text>
+              <Text style={styles.memberName}>{invite.phoneMasked}</Text>
+              <Text style={styles.memberPhone}>Invited · not joined yet</Text>
             </Card>
           ))}
         </>
       )}
     </ScrollView>
   );
-}
-
-function formatPhone(phone: string) {
-  if (phone.length === 10) {
-    return `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6)}`;
-  }
-  return phone;
 }
 
 const styles = StyleSheet.create({

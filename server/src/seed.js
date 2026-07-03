@@ -14,14 +14,14 @@ const existingHost = db.prepare("SELECT id FROM users WHERE phone = '5551234567'
 if (!existingHost) {
   const hostId = uuidv4();
   db.prepare(`
-    INSERT INTO users (id, phone, name, password_hash, is_host, subscription_status, subscription_expires_at)
-    VALUES (?, '5551234567', 'Demo Host', ?, 1, 'active', datetime('now', '+1 month'))
+    INSERT INTO users (id, phone, name, nickname, password_hash, is_host, subscription_status, subscription_expires_at)
+    VALUES (?, '5551234567', 'Demo Host', 'AceHost', ?, 1, 'active', datetime('now', '+1 month'))
   `).run(hostId, hashPassword('demo1234'));
 
   const playerId = uuidv4();
   db.prepare(`
-    INSERT INTO users (id, phone, name, password_hash)
-    VALUES (?, '5559876543', 'Demo Player', ?)
+    INSERT INTO users (id, phone, name, nickname, password_hash)
+    VALUES (?, '5559876543', 'Demo Player', 'RiverRat', ?)
   `).run(playerId, hashPassword('demo1234'));
 
   const gameId = uuidv4();

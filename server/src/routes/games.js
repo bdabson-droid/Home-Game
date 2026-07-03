@@ -6,6 +6,7 @@ const {
   joinOrWaitlist,
   promoteFromWaitlist,
 } = require('../utils/seats');
+const { maskPhone, displayName } = require('../utils/display');
 
 function createGameRoutes(db) {
   const router = Router();
@@ -155,7 +156,7 @@ function createGameRoutes(db) {
     const enriched = enrichGame(db, req.params.id);
 
     const members = db.prepare(`
-      SELECT gm.*, u.name, u.phone
+      SELECT gm.*, u.name, u.nickname
       FROM game_members gm
       JOIN users u ON u.id = gm.user_id
       WHERE gm.game_id = ? AND gm.status = 'active'
@@ -163,7 +164,7 @@ function createGameRoutes(db) {
     `).all(req.params.id);
 
     const waitingList = db.prepare(`
-      SELECT gm.*, u.name, u.phone,
+      SELECT gm.*, u.name, u.nickname,
         (SELECT COUNT(*) + 1 FROM game_members gm2
           WHERE gm2.game_id = gm.game_id AND gm2.status = 'waiting' AND gm2.joined_at < gm.joined_at
         ) as position
@@ -184,21 +185,19 @@ function createGameRoutes(db) {
       game: formatGame(enriched),
       members: members.map((m) => ({
         id: m.user_id,
-        name: m.name,
-        phone: m.phone,
+        nickname: displayName(m),
         role: m.role,
         joinedAt: m.joined_at,
       })),
       waitingList: waitingList.map((m) => ({
         id: m.user_id,
-        name: m.name,
-        phone: m.phone,
+        nickname: displayName(m),
         position: m.position,
         joinedAt: m.joined_at,
       })),
       pendingInvites: invites.map((i) => ({
         id: i.id,
-        phone: i.phone,
+        phoneMasked: maskPhone(i.phone),
         invitedBy: i.invited_by_name,
         createdAt: i.created_at,
       })),
@@ -268,8 +267,8 @@ function createGameRoutes(db) {
     const promoted = promoteFromWaitlist(db, req.params.id);
     let message = 'Member removed';
     if (promoted) {
-      const user = db.prepare('SELECT name FROM users WHERE id = ?').get(promoted.user_id);
-      message = `Member removed. ${user.name} promoted from the waiting list.`;
+      const user = db.prepare('SELECT name, nickname FROM users WHERE id = ?').get(promoted.user_id);
+      message = `Member removed. ${displayName(user)} promoted from the waiting list.`;
     }
 
     res.json({ message, promotedUserId: promoted?.user_id || null });

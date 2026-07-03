@@ -35,10 +35,15 @@ function createAuthRoutes(db) {
 
   router.post('/register', (req, res) => {
     const phone = normalizePhone(req.body.phone || '');
-    const { name, password, otp, isHost } = req.body;
+    const { name, nickname, password, otp, isHost } = req.body;
+    const publicName = (nickname || name || '').trim();
 
-    if (!phone || !name || !password || !otp) {
-      return res.status(400).json({ error: 'Phone, name, password, and OTP are required' });
+    if (!phone || !publicName || !password || !otp) {
+      return res.status(400).json({ error: 'Phone, nickname, password, and OTP are required' });
+    }
+
+    if (publicName.length < 2 || publicName.length > 24) {
+      return res.status(400).json({ error: 'Nickname must be 2–24 characters' });
     }
 
     const otpRow = db.prepare('SELECT * FROM otp_codes WHERE phone = ?').get(phone);
@@ -56,8 +61,8 @@ function createAuthRoutes(db) {
 
     const id = uuidv4();
     db.prepare(
-      `INSERT INTO users (id, phone, name, password_hash, is_host) VALUES (?, ?, ?, ?, ?)`
-    ).run(id, phone, name, hashPassword(password), isHost ? 1 : 0);
+      `INSERT INTO users (id, phone, name, nickname, password_hash, is_host) VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(id, phone, publicName, publicName, hashPassword(password), isHost ? 1 : 0);
 
     db.prepare('DELETE FROM otp_codes WHERE phone = ?').run(phone);
 
@@ -89,14 +94,28 @@ function createAuthRoutes(db) {
     res.json({ user: formatUser(user) });
   });
 
+  router.patch('/profile', require('../middleware/auth').requireAuth, (req, res) => {
+    const nickname = String(req.body.nickname || '').trim();
+    if (!nickname || nickname.length < 2 || nickname.length > 24) {
+      return res.status(400).json({ error: 'Nickname must be 2–24 characters' });
+    }
+
+    db.prepare('UPDATE users SET nickname = ? WHERE id = ?').run(nickname, req.user.id);
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+    res.json({ user: formatUser(user) });
+  });
+
   return router;
 }
 
 function formatUser(user) {
+  const nickname = user.nickname || user.name;
   return {
     id: user.id,
     phone: user.phone,
     name: user.name,
+    nickname,
+    displayName: nickname,
     isHost: !!user.is_host,
     subscriptionStatus: user.subscription_status,
     subscriptionExpiresAt: user.subscription_expires_at,

@@ -18,7 +18,7 @@ import { colors, spacing } from '../../constants/theme';
 export default function RegisterScreen() {
   const { register } = useAuth();
   const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [isHost, setIsHost] = useState(false);
@@ -48,7 +48,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     setError('');
-    if (!phone || !name || !password || !otp) {
+    if (!phone || !nickname || !password || !otp) {
       setError('All fields are required');
       return;
     }
@@ -56,7 +56,7 @@ export default function RegisterScreen() {
     try {
       await register({
         phone: phone.replace(/\D/g, ''),
-        name,
+        nickname: nickname.trim(),
         password,
         otp,
         isHost,
@@ -90,10 +90,11 @@ export default function RegisterScreen() {
           keyboardType="phone-pad"
         />
         <Input
-          label="Display Name"
-          placeholder="Your name"
-          value={name}
-          onChangeText={setName}
+          label="Nickname"
+          placeholder="Name shown at the table"
+          value={nickname}
+          onChangeText={setNickname}
+          maxLength={24}
         />
         <Input
           label="Password"

@@ -44,6 +44,8 @@ export interface User {
   id: string;
   phone: string;
   name: string;
+  nickname: string;
+  displayName: string;
   isHost: boolean;
   subscriptionStatus: string;
   subscriptionExpiresAt?: string;
@@ -71,23 +73,21 @@ export interface HomeGame {
 
 export interface GameMember {
   id: string;
-  name: string;
-  phone: string;
+  nickname: string;
   role: string;
   joinedAt: string;
 }
 
 export interface WaitingMember {
   id: string;
-  name: string;
-  phone: string;
+  nickname: string;
   position: number;
   joinedAt: string;
 }
 
 export interface PendingInvite {
   id: string;
-  phone: string;
+  phoneMasked: string;
   invitedBy: string;
   createdAt: string;
 }
@@ -108,7 +108,7 @@ export const api = {
       body: JSON.stringify({ phone }),
     }),
 
-  register: (data: { phone: string; name: string; password: string; otp: string; isHost?: boolean }) =>
+  register: (data: { phone: string; nickname: string; password: string; otp: string; isHost?: boolean }) =>
     request<{ token: string; user: User }>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -121,6 +121,12 @@ export const api = {
     }),
 
   me: () => request<{ user: User }>('/api/auth/me'),
+
+  updateNickname: (nickname: string) =>
+    request<{ user: User }>('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify({ nickname }),
+    }),
 
   getGames: () => request<{ games: HomeGame[] }>('/api/games'),
 

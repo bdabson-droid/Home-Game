@@ -13,6 +13,7 @@ function initDb() {
       id TEXT PRIMARY KEY,
       phone TEXT UNIQUE NOT NULL,
       name TEXT NOT NULL,
+      nickname TEXT,
       password_hash TEXT NOT NULL,
       is_host INTEGER DEFAULT 0,
       stripe_customer_id TEXT,
@@ -90,6 +91,14 @@ function initDb() {
   } catch {
     // column already exists
   }
+
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN nickname TEXT`);
+  } catch {
+    // column already exists
+  }
+
+  db.exec(`UPDATE users SET nickname = name WHERE nickname IS NULL OR nickname = ''`);
 
   return db;
 }

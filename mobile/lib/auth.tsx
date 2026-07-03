@@ -5,9 +5,10 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (phone: string, password: string) => Promise<void>;
-  register: (data: { phone: string; name: string; password: string; otp: string; isHost?: boolean }) => Promise<void>;
+  register: (data: { phone: string; nickname: string; password: string; otp: string; isHost?: boolean }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(u);
   };
 
-  const register = async (data: { phone: string; name: string; password: string; otp: string; isHost?: boolean }) => {
+  const register = async (data: { phone: string; nickname: string; password: string; otp: string; isHost?: boolean }) => {
     const { token, user: u } = await api.register(data);
     await setToken(token);
     setUser(u);
@@ -53,8 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const updateNickname = async (nickname: string) => {
+    const { user: u } = await api.updateNickname(nickname);
+    setUser(u);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, updateNickname }}>
       {children}
     </AuthContext.Provider>
   );
